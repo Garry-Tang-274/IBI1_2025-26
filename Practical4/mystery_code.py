@@ -4,7 +4,7 @@
 # Import libraries
 # randint allows drawing a random number,
 # e.g. randint(1,5) draws a number between 1 and 5
-from random import randint # Import the randint function from the random library to generate random integers
+from random import randint # Import the randint function from the random library to generate random integers.
 
 # ceil takes the ceiling of a number, i.e. the next higher integer.
 # e.g. ceil(4.2)=5

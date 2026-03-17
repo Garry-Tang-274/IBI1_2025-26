@@ -1,0 +1,66 @@
+import matplotlib.pyplot as plt
+
+# Define heart rate dataset (MODIFY HERE - pseudocode)
+# ↓↓↓ [Modify this list to change heart rate data] ↓↓↓
+heart_rates = [72, 60, 126, 85, 90, 59, 76, 131, 88, 121, 64]
+# ↑↑↑ [End of modifiable variable] ↑↑↑
+
+# Calculate patient count and average heart rate
+patient_count = len(heart_rates)
+avg_hr = sum(heart_rates) / patient_count
+
+# Print basic statistics (formatted output)
+print("="*60)
+print("🩺 Basic Heart Rate Statistics")
+print("="*60)
+print(f"Total Number of Patients: {patient_count:>8}")
+print(f"Average Resting Heart Rate: {avg_hr:>6.1f} bpm")
+
+# Classify heart rates and count per category
+hr_categories = {"Low": 0, "Normal": 0, "High": 0}
+for hr in heart_rates:
+    if hr < 60:
+        hr_categories["Low"] += 1
+    elif 60 <= hr <= 120:
+        hr_categories["Normal"] += 1
+    else:
+        hr_categories["High"] += 1
+
+# Find the most common category
+max_category = max(hr_categories, key=hr_categories.get)
+max_count = hr_categories[max_category]
+
+# Print category statistics (formatted)
+print("\n" + "="*60)
+print("🩺 Heart Rate Category Distribution")
+print("="*60)
+for cat, count in hr_categories.items():
+    # Highlight the most common category
+    highlight = " 🚨 Most Common" if cat == max_category else ""
+    print(f"{cat:<8} : {count:>3} patient(s){highlight}")
+print(f"\n✅ Most frequent category: {max_category} ({max_count} patients)")
+
+# Plot labeled pie chart
+labels = list(hr_categories.keys())
+counts = list(hr_categories.values())
+colors = ["#ff9999", "#66b3ff", "#99ff99"]
+explode = (0.1, 0, 0)  # Highlight the most common slice
+
+plt.figure(figsize=(8, 6))
+wedges, texts, autotexts = plt.pie(
+    counts,
+    labels=labels,
+    colors=colors,
+    explode=explode,
+    autopct="%1.1f%%",
+    startangle=90,
+    textprops={"fontsize": 10}
+)
+# Add count labels to pie chart
+for i, autotext in enumerate(autotexts):
+    autotext.set_text(f"{counts[i]}\n({autotext.get_text()})")
+    autotext.set_fontsize(9)
+
+plt.title("Distribution of Resting Heart Rate Categories", fontsize=12, pad=15)
+plt.tight_layout()
+plt.show()

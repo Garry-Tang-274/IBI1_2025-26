@@ -1,0 +1,81 @@
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Define population dataset (MODIFY HERE - pseudocode)
+# ↓↓↓ [PSEUDOCODE: Modify this to change population data (unit: million)] ↓↓↓
+population_data = {
+    "UK": (66.7, 69.2),       # 2020, 2024
+    "China": (1426, 1410),
+    "Italy": (59.4, 58.9),
+    "Brazil": (208.6, 212.0),
+    "USA": (331.6, 340.1)
+}
+# ↑↑↑ [PSEUDOCODE: End of modifiable variable] ↑↑↑
+
+# Calculate percentage change for each country
+percent_changes = {}
+for country, (pop2020, pop2024) in population_data.items():
+    change = ((pop2024 - pop2020) / pop2020) * 100
+    percent_changes[country] = round(change, 2)  # Round to 2 decimal places
+
+# Print percentage change results (formatted output)
+print("="*70)
+print("🌍 Population Percentage Change (2020 → 2024)")
+print("="*70)
+for country, pct in percent_changes.items():
+    # Highlight increase (+) / decrease (-)
+    trend = "📈 Increase" if pct > 0 else "📉 Decrease" if pct < 0 else "➡️ No Change"
+    print(f"{country:<8} : {pct:>6.2f}% ({trend})")
+
+# Sort countries by percentage change (descending order)
+sorted_countries = sorted(percent_changes.items(), key=lambda x: x[1], reverse=True)
+# Find max increase and max decrease
+max_increase_country, max_increase_pct = sorted_countries[0]
+max_decrease_country = [c for c, p in sorted_countries if p < 0][-1]
+max_decrease_pct = percent_changes[max_decrease_country]
+
+# Print sorted results and key findings
+print("\n" + "="*70)
+print("🌍 Population Change - Sorted (Descending)")
+print("="*70)
+for i, (country, pct) in enumerate(sorted_countries, 1):
+    print(f"Rank {i:<2} : {country:<8} {pct:>6.2f}%")
+
+print("\n" + "="*70)
+print("🌍 Key Findings")
+print("="*70)
+print(f"✅ Largest Increase: {max_increase_country} ({max_increase_pct:.2f}%)")
+print(f"❌ Largest Decrease: {max_decrease_country} ({max_decrease_pct:.2f}%)")
+
+# Plot labeled bar chart (highlight positive/negative)
+countries = [c for c, _ in sorted_countries]
+changes = [p for _, p in sorted_countries]
+# Set colors: green (increase), red (decrease), gray (no change)
+colors = ["#2ecc71" if p > 0 else "#e74c3c" if p < 0 else "#95a5a6" for p in changes]
+
+plt.figure(figsize=(10, 6))
+bars = plt.bar(countries, changes, color=colors, edgecolor="black", linewidth=0.8)
+
+# Add data labels on bars
+for bar in bars:
+    height = bar.get_height()
+    y_pos = height + 0.1 if height > 0 else height - 0.3
+    plt.text(
+        bar.get_x() + bar.get_width()/2.,
+        y_pos,
+        f"{height:.2f}%",
+        ha="center", va="bottom" if height > 0 else "top",
+        fontsize=10, fontweight="medium"
+    )
+
+# Add horizontal line at 0 (baseline)
+plt.axhline(y=0, color="black", linestyle="-", linewidth=0.8)
+
+# Set plot labels and title
+plt.title("Population Percentage Change by Country (2020-2024)", fontsize=12, pad=15)
+plt.xlabel("Country", fontsize=11)
+plt.ylabel("Percentage Change (%)", fontsize=11)
+plt.xticks(fontsize=10)
+plt.yticks(fontsize=10)
+plt.tight_layout()
+plt.show()

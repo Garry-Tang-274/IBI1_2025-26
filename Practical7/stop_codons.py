@@ -57,7 +57,7 @@ def write_filtered_fasta(output_path, gene_dict):
                 for k in range(0, len(seq), 80):
                     f.write(seq[k:k+80] + "\n")
 
-# 3. Main program
+# 3. Core program execution
 if __name__ == "__main__":
     # Set input and output file paths
     INPUT_FILE = r"Saccharomyces_cerevisiae.R64-1-1.cdna.all.fa"

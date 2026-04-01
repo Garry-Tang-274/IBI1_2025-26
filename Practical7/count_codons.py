@@ -2,13 +2,15 @@
 # 1. Define constants
 import os
 import matplotlib.pyplot as plt
+import numpy as np
 
 # DNA codons (cDNA sequence)
 START_CODON = "ATG"
 VALID_STOP_CODONS = {"TAA", "TAG", "TGA"}
-# Plot style configuration
+# Plot style configuration (EXTREMELY LARGE for all 64 codons)
 plt.rcParams['font.sans-serif'] = ['DejaVu Sans']
-plt.rcParams['figure.figsize'] = (12, 8)
+plt.rcParams['figure.figsize'] = (24, 20)  # Super large figure
+plt.rcParams['axes.unicode_minus'] = False
 
 # 2. Define functions
 def read_fasta(file_path):
@@ -76,29 +78,63 @@ def count_all_codons(fasta_dict, target_stop):
     print(f"Total genes with {target_stop} as stop codon: {valid_genes}")
     return total_codon_counts
 
-def plot_codon_pie(codon_counts, target_stop):
-    """Plot codon frequency pie chart, save to file"""
-    codons = list(codon_counts.keys())
-    counts = list(codon_counts.values())
-    # Draw pie chart
+def plot_codon_pie_all_codons(codon_counts, target_stop):
+    """
+    Plot PIE CHART WITH ALL 64 CODONS (NO 'Other'), SORTED DESCENDING, NO OVERLAP.
+    Uses extremely large figure, external multi-column legend, and smart labeling.
+    """
+    # 1. Sort ALL codons STRICTLY by frequency (DESCENDING) - REQUIREMENT 2
+    sorted_items = sorted(codon_counts.items(), key=lambda x: x[1], reverse=True)
+    labels = [item[0] for item in sorted_items]
+    sizes = [item[1] for item in sorted_items]
+    total_count = sum(sizes)
+    
+    # 2. Create figure with EXTREMELY LARGE size to fit everything
     fig, ax = plt.subplots()
+    
+    # 3. Use a high-contrast color map with 64 distinct colors
+    colors = plt.cm.gist_ncar(np.linspace(0, 1, len(labels)))
+    
+    # 4. Draw pie chart: NO LABELS ON PIE, ONLY PERCENTAGE (smart display)
     wedges, texts, autotexts = ax.pie(
-        counts, labels=codons, autopct='%1.1f%%',
-        startangle=90, labeldistance=1.05, rotatelabels=True
+        sizes,
+        labels=None,  # CRITICAL: NO CODON NAMES ON PIE TO AVOID OVERLAP
+        autopct=lambda pct: f'{pct:.1f}%' if pct > 0.5 else '',  # Show % only if > 0.5%
+        startangle=90,
+        colors=colors,
+        wedgeprops=dict(edgecolor='white', linewidth=0.5, alpha=0.95),
+        pctdistance=0.82,  # Position percentage text inside
+        counterclock=False  # Sort CLOCKWISE (largest first at top right)
     )
-    # Set text style
-    for text in texts:
-        text.set_fontsize(8)
+    
+    # 5. Style percentage text
     for autotext in autotexts:
-        autotext.set_color("white")
+        autotext.set_color("black")
         autotext.set_fontsize(7)
-    # Add title
-    ax.set_title(f"Codon Frequency Upstream of {target_stop} (Longest ORF)", fontsize=16, pad=20)
-    # Save pie chart
-    save_path = f"codon_frequency_{target_stop}.png"
+        autotext.set_weight('bold')
+    
+    # 6. Add EXTERNAL MULTI-COLUMN LEGEND (SOLVES OVERLAP) - REQUIREMENT 3
+    # Legend is placed on the right, split into 4 columns for all 64 codons
+    ax.legend(wedges, labels,
+              title=f"Codon (Total: {len(labels)})",
+              loc="center left",
+              bbox_to_anchor=(1.02, 0, 0.5, 1),
+              ncol=4,  # Split into 4 columns to fit all 64 codons
+              fontsize=9,
+              title_fontsize=12)
+    
+    # 7. Add title (explicitly states sorted descending)
+    ax.set_title(f"Codon Frequency Upstream of {target_stop}\n(All {len(labels)} Codons, Sorted by Frequency Descending)",
+                 fontsize=20, pad=30)
+    
+    # 8. Equal aspect ratio ensures pie is drawn as a circle
+    ax.axis('equal')
+    
+    # 9. Save pie chart (EXTREMELY HIGH DPI to capture all details)
+    save_path = f"codon_frequency_{target_stop}_all_codons.png"
     plt.tight_layout()
-    plt.savefig(save_path, dpi=300, bbox_inches="tight")
-    print(f"Pie chart saved to: {save_path}")
+    plt.savefig(save_path, dpi=400, bbox_inches="tight")
+    print(f"Full codon pie chart saved to: {save_path}")
     plt.close()
 
 def validate_user_input():
@@ -142,9 +178,9 @@ if __name__ == "__main__":
     for codon, count in sorted_codons:
         print(f"{codon}: {count}")
 
-    # Step 5: Plot and save pie chart
+    # Step 5: Plot and save FULL PIE CHART (ALL CODONS, NO OVERLAP)
     if codon_counts:
-        plot_codon_pie(codon_counts, target_stop)
+        plot_codon_pie_all_codons(codon_counts, target_stop)
     else:
         print(f"\nNo codons found upstream of {target_stop}!")
 

@@ -1,0 +1,4 @@
+Question: What was the distribution of DALYs across all countries in 2019?
+Code starting line number: 55
+Result discussion:
+The histogram illustrates the frequency distribution of national DALYs rates in 2019. Most countries are concentrated in the low-to-medium DALYs range of 20000 to 40000. The peak number of countries appears in the 25000-30000 interval. The overall distribution is distinctly right-skewed. As DALYs rate increases, the number of corresponding countries gradually decreases, with only a tiny number of countries holding extremely high DALYs values above 60000.

@@ -1,62 +1,65 @@
-# Import required libraries
+# Step 1: Import all required libraries (follow guide)
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 
-# Load CSV file from the same folder
-df = pd.read_csv("dalys-rate-from-all-causes.csv")
+# Step 2: Load CSV from same folder (no path change needed)
+dalys_data = pd.read_csv("dalys-rate-from-all-causes.csv")
 
-# Required output: Basic dataset check
-print("===== Dataset Head =====")
-print(df.head())
+# Step 3: Basic dataframe inspection (follow guide)
+print("===== Dataset Head (5 rows) =====")
+print(dalys_data.head(5))
+
 print("\n===== Dataset Info =====")
-df.info()
-# Required: Only show DALYs statistics
-print("\n===== DALYs Descriptive Statistics =====")
-print(df["DALYs"].describe())
+dalys_data.info()
 
-# 1. Required: First 10 rows (Year and DALYs)
-print("\n===== First 10 Rows (Year & DALYs) =====")
-first_10 = df.iloc[:10, [2, 3]]
+print("\n===== DALYs Descriptive Statistics =====")
+print(dalys_data["DALYs"].describe())
+
+# Step 4: Show Year & DALYs (3rd & 4th columns) for first 10 rows
+print("\n===== First 10 rows: Year & DALYs =====")
+first_10 = dalys_data.iloc[0:10, [2, 3]]
 print(first_10)
 
-# Comment: Max DALYs year for Afghanistan in first 10 records: 1998
-afg_data = df[df["Entity"] == "Afghanistan"].iloc[:10]
+# Comment: Max DALYs year in Afghanistan first 10 records: 1998
+afg_data = dalys_data[dalys_data["Entity"] == "Afghanistan"].iloc[0:10]
 afg_max_year = afg_data.loc[afg_data["DALYs"].idxmax(), "Year"]
 
-# 2. Required: Select all data for Zimbabwe
-print("\n===== Zimbabwe Data (First 5 Rows) =====")
-zim_data = df[df["Entity"] == "Zimbabwe"][["Year", "DALYs"]]
+# Step 5: Boolean selection for Zimbabwe (follow guide)
+zim_bool = dalys_data["Entity"] == "Zimbabwe"
+zim_data = dalys_data.loc[zim_bool, ["Year", "DALYs"]]
+print("\n===== Zimbabwe Data (first 5 rows) =====")
 print(zim_data.head())
-# Comment: Zimbabwe data time range: 1990 - 2019
+# Comment: Zimbabwe data period: 1990 - 2019
 
-# 3. Required: Max and Min DALYs countries in 2019
-data_2019 = df[df["Year"] == 2019]
-max_country = data_2019.loc[data_2019["DALYs"].idxmax(), "Entity"]
-min_country = data_2019.loc[data_2019["DALYs"].idxmin(), "Entity"]
-print(f"\n===== 2019 Results =====")
+# Step 6: Get 2019 max & min DALYs countries (follow guide)
+recent_data = dalys_data.loc[dalys_data.Year == 2019, ["Entity", "DALYs"]]
+max_country = recent_data.loc[recent_data["DALYs"].idxmax(), "Entity"]
+min_country = recent_data.loc[recent_data["DALYs"].idxmin(), "Entity"]
+print("\n===== 2019 Results =====")
 print(f"Country with highest DALYs: {max_country}")
 print(f"Country with lowest DALYs: {min_country}")
 
-# 4. Required: Plot trend for max and min country in ONE figure + save
-max_trend = df[df["Entity"] == max_country]
-min_trend = df[df["Entity"] == min_country]
+# Step 7: Plot trend for max & min country in ONE figure
+max_trend = dalys_data[dalys_data["Entity"] == max_country]
+min_trend = dalys_data[dalys_data["Entity"] == min_country]
 
 plt.figure(figsize=(10, 6))
-plt.plot(max_trend["Year"], max_trend["DALYs"], "r-o", label=f"Highest: {max_country}")
-plt.plot(min_trend["Year"], min_trend["DALYs"], "b-o", label=f"Lowest: {min_country}")
+plt.plot(max_trend.Year, max_trend.DALYs, "r-o", label=f"Highest: {max_country}")
+plt.plot(min_trend.Year, min_trend.DALYs, "b-o", label=f"Lowest: {min_country}")
 plt.xlabel("Year")
 plt.ylabel("DALYs Rate")
-plt.title("DALYs Trend (2019 Highest vs Lowest Countries)")
+plt.title("DALYs Trend: 2019 Highest vs Lowest Countries")
 plt.legend()
-plt.xticks(rotation=45)
+plt.xticks(rotation=-45)
 plt.savefig("max_min_trend.png")
 plt.close()
 
-# Self-defined Task (Required)
+# Step 8: Self-defined task (follow guide question)
 # Question: What was the distribution of DALYs across all countries in 2019?
 plt.figure(figsize=(8, 5))
-# Use histogram for more intuitive distribution
-plt.hist(data_2019["DALYs"].dropna(), bins=20, color="skyblue", edgecolor="black")
+plt.hist(recent_data["DALYs"].dropna(), bins=20, color="skyblue", edgecolor="black")
 plt.xlabel("DALYs Rate")
 plt.ylabel("Number of Countries")
 plt.title("Distribution of DALYs Across All Countries in 2019")

@@ -1,0 +1,2 @@
+This practical was a bit challenging but fun. Making the basic SIR model work was okay, but the 2D spatial model was definitely the hardest part. I had to really think about how to check the 8 neighbor cells without getting out-of-bounds errors.
+My favorite part was plotting the vaccination graph. It was really cool to see "herd immunity" actually working as the curves got flatter. The biggest thing I learned was how to turn real-life things, like a virus spreading, into code and random numbers to simulate what happens over time

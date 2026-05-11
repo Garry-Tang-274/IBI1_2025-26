@@ -6,8 +6,8 @@ from matplotlib import cm
 N = 10000
 beta = 0.3
 gamma = 0.05
-time_steps = 200  # Shortened steps for clear peak
-vaccine_ratios = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8]  # Remove 1.0 (useless)
+time_steps = 1000  # Restored to 1000 steps as required by the guide
+vaccine_ratios = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]  # Included 90% and 100% to complete the range
 
 # Initialize larger figure
 plt.figure(figsize=(12, 6), dpi=150)
@@ -38,14 +38,15 @@ for idx, ratio in enumerate(vaccine_ratios):
         I_history.append(I)
     
     # Plot with clear style (thick line + transparency)
-    color = cm.tab10(idx)
+    # Replaced tab10 with viridis to properly accommodate 11 distinct lines without index overlap
+    color = cm.viridis(idx / (len(vaccine_ratios) - 1))
     plt.plot(I_history, label=f'Vaccine {int(ratio*100)}%', 
              color=color, linewidth=2, alpha=0.8)
 
 # Optimize layout
 plt.xlabel('Time Step', fontsize=12)
 plt.ylabel('Infected Count', fontsize=12)
-plt.title('SIR Model with Vaccination (Clear Peaks)', fontsize=14)
+plt.title('SIR Model with Vaccination', fontsize=14)
 plt.legend(bbox_to_anchor=(1, 1), loc="upper left", fontsize=10)
 plt.grid(alpha=0.3)
 plt.tight_layout()

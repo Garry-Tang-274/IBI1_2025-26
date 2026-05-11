@@ -40,6 +40,7 @@ min_country = recent_data.loc[recent_data["DALYs"].idxmin(), "Entity"]
 print("\n===== 2019 Results =====")
 print(f"Country with highest DALYs: {max_country}")
 print(f"Country with lowest DALYs: {min_country}")
+# Comment: In 2019, the country with the highest DALYs was Lesotho, and the lowest was Singapore.
 
 # Step 7: Plot trend for max & min country in ONE figure
 max_trend = dalys_data[dalys_data["Entity"] == max_country]

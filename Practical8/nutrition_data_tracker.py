@@ -1,48 +1,62 @@
-# Define food item class
-class FoodItem:
-    def __init__(self, name, calories, protein, carbs, fat):
+# Define the food_item class as specified in the practical guide
+class food_item:
+    def __init__(self, name, calories, protein, carbohydrates, fat):
         self.name = name
         self.calories = calories
         self.protein = protein
-        self.carbs = carbs
+        self.carbohydrates = carbohydrates
         self.fat = fat
 
-# Calculate total nutrition and check warnings
+# Function to calculate 24-hour total nutrition and check for warnings
 def calculate_nutrition(food_list):
-    total_cal = 0
-    total_pro = 0
-    total_car = 0
+    total_calories = 0
+    total_protein = 0
+    total_carbohydrates = 0
     total_fat = 0
 
-    # Sum all nutrition data
-    for food in food_list:
-        total_cal += food.calories
-        total_pro += food.protein
-        total_car += food.carbs
-        total_fat += food.fat
+    # Sum up all nutritional data from the consumed items
+    for item in food_list:
+        total_calories += item.calories
+        total_protein += item.protein
+        total_carbohydrates += item.carbohydrates
+        total_fat += item.fat
 
-    # Print total results
-    print("=== 24H Total Nutrition ===")
-    print(f"Calories: {total_cal} kcal")
-    print(f"Protein: {total_pro} g")
-    print(f"Carbohydrates: {total_car} g")
-    print(f"Fat: {total_fat} g")
+    # Report the total results for the 24-hour period
+    print("=== 24-Hour Nutritional Summary ===")
+    print(f"Total Calories: {total_calories} kcal")
+    print(f"Total Protein: {total_protein} g")
+    print(f"Total Carbohydrates: {total_carbohydrates} g")
+    print(f"Total Fat: {total_fat} g")
 
-    # Print warnings
-    print("\n=== Warnings ===")
-    if total_cal > 2500:
-        print("Warning: Calories exceed 2500 kcal!")
+    # Check and report warnings based on the specified thresholds
+    print("\n=== Nutritional Warnings ===")
+    warning_triggered = False
+    
+    # Warning for excessive calories (> 2,500)
+    if total_calories > 2500:
+        print("Warning: Caloric intake exceeds 2,500 kcal!")
+        warning_triggered = True
+    
+    # Warning for excessive fat (> 90 g)
     if total_fat > 90:
-        print("Warning: Fat exceed 90 g!")
-    if total_cal <= 2500 and total_fat <= 90:
-        print("No warnings, nutrition intake is normal.")
+        print("Warning: Fat intake exceeds 90 g!")
+        warning_triggered = True
+        
+    # If no thresholds are exceeded
+    if not warning_triggered:
+        print("All nutritional levels are within the normal range.")
 
-# Main execution
+# Example usage of the class and function for assessment
 if __name__ == "__main__":
-    # Example (required by the task)
-    print("This is an example:\n")
-    food1 = FoodItem("Rice", 200, 4, 45, 0.5)
-    food2 = FoodItem("Chicken", 250, 30, 0, 8)
-    food3 = FoodItem("Apple", 95, 0.5, 22, 0.3)
-    daily_food = [food1, food2, food3]
-    calculate_nutrition(daily_food)
+    # Example food item as described in the assignment (Apple: 60 cal, 0.3g pro, 15g carb, 0.5g fat)
+    apple = food_item("Apple", 60, 0.3, 15, 0.5)
+    
+    # Additional items to simulate a 24-hour consumption list
+    chicken = food_item("Chicken", 250, 30, 0, 8)
+    rice = food_item("Rice", 200, 4, 45, 0.5)
+    
+    # List of food items consumed
+    daily_consumption = [apple, chicken, rice]
+    
+    # Calling the function to report data and warnings
+    calculate_nutrition(daily_consumption)

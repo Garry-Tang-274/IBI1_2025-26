@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 N = 10000
 beta = 0.3
 gamma = 0.05
-time_steps = 200  # Shortened steps to expand the peak area
+time_steps = 1000  # Restored to 1000 steps as required by the guide
 
 # Initial population state
 S = N - 1
@@ -37,15 +37,15 @@ for _ in range(time_steps):
     I_history.append(I)
     R_history.append(R)
 
-# Plot optimized results (Larger figure, thicker lines)
+# Plot optimized results
 plt.figure(figsize=(10, 6), dpi=150)
 plt.plot(S_history, label='Susceptible', color='blue', linewidth=2)
-plt.plot(I_history, label='Infected', color='red', linewidth=3)  # Highlight infected peak
+plt.plot(I_history, label='Infected', color='red', linewidth=3)
 plt.plot(R_history, label='Recovered', color='green', linewidth=2)
 
 plt.xlabel('Time Step')
 plt.ylabel('Population Count')
-plt.title('Stochastic SIR Model (Clear Peak)')
+plt.title('Stochastic SIR Model')
 plt.legend(fontsize=12)
 plt.grid(alpha=0.3)
 plt.savefig('SIR.png')

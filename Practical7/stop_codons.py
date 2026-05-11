@@ -1,11 +1,18 @@
-# 1. Define constants
-# DNA codons (cDNA sequence)
-START_CODON = "ATG"
-STOP_CODONS = {"TAA", "TAG", "TGA"}
+import os
+import sys
+import matplotlib.pyplot as plt
+import numpy as np
 
-# 2. Define functions
+# 2. Define genetic constants
+START_CODON = "ATG"
+VALID_STOPS = {"TAA", "TAG", "TGA"}
+
+# 3. Define standalone functions
 def read_fasta(file_path):
-    """Read FASTA file, return {gene_name: sequence} dict"""
+    """
+    Standalone function to parse FASTA files.
+    Extracts only the gene ID to comply with formatting requirements.
+    """
     fasta_data = {}
     current_name = ""
     seq_lines = []
@@ -15,60 +22,115 @@ def read_fasta(file_path):
             line = line.strip()
             if not line:
                 continue
-            # Header line
+            # Handle the header line
             if line.startswith(">"):
                 if current_name:
                     fasta_data[current_name] = "".join(seq_lines)
-                # Get gene name (first part of header)
-                current_name = line.split()[0][1:]
+                # split()[0] removes metadata; [1:] removes '>'
+                current_name = line.split()[0][1:] 
                 seq_lines = []
-            # Sequence line
             else:
                 seq_lines.append(line)
-    # Save last gene
+    
     if current_name:
         fasta_data[current_name] = "".join(seq_lines)
     return fasta_data
 
-def find_in_frame_stops(sequence):
-    """Find all in-frame stop codons in the sequence"""
-    found_stops = set()
-    seq_len = len(sequence)
-    # Find all ATG start positions
+def get_longest_orf_codons(seq, target_stop):
+    """
+    Finds the longest ORF that ends specifically with the user-defined target stop codon.
+    Returns the list of codons located upstream of that stop codon.
+    """
+    valid_orfs = []
+    seq_len = len(seq)
+    
+    # Scan every position for the start codon 'ATG'
     for i in range(seq_len - 2):
-        if sequence[i:i+3] == START_CODON:
-            # Read codons step 3 (in-frame)
+        if seq[i:i+3] == START_CODON:
+            current_codons = []
+            # Read in steps of 3 (in-frame)
             for j in range(i, seq_len - 2, 3):
-                codon = sequence[j:j+3]
-                if codon in STOP_CODONS:
-                    found_stops.add(codon)
-                    break  # Stop at first termination
-    return found_stops
+                codon = seq[j:j+3]
+                
+                # Check for any stop codon in the current frame
+                if codon in VALID_STOPS:
+                    # If it matches the target stop, save this potential ORF
+                    if codon == target_stop:
+                        valid_orfs.append(current_codons.copy())
+                    break  # Stop translation at the first stop codon encountered
+                
+                current_codons.append(codon)
+                
+    # Return the longest sequence from the valid ORFs found
+    if valid_orfs:
+        return max(valid_orfs, key=len)
+    return []
 
-def write_filtered_fasta(output_path, gene_dict):
-    """Write genes with stop codons to new FASTA file"""
-    with open(output_path, "w") as f:
-        for gene, seq in gene_dict.items():
-            stops = find_in_frame_stops(seq)
-            if stops:
-                # Write header: >gene stop1,stop2
-                f.write(f">{gene} {','.join(stops)}\n")
-                # Write sequence (80 chars per line)
-                for k in range(0, len(seq), 80):
-                    f.write(seq[k:k+80] + "\n")
+def plot_usage_pie(counts, stop_type):
+    """
+    Generates and saves a pie chart showing the frequency of the Top 10 codons.
+    The remaining codons are grouped into 'Other' for visual clarity.
+    """
+    # Sort codons by frequency in descending order
+    sorted_items = sorted(counts.items(), key=lambda x: x[1], reverse=True)
+    total_count = sum(counts.values())
+    
+    # Logic to separate Top 10 from the rest
+    labels = [item[0] for item in sorted_items[:10]]
+    sizes = [item[1] for item in sorted_items[:10]]
+    
+    if len(sorted_items) > 10:
+        labels.append("Other")
+        sizes.append(sum(item[1] for item in sorted_items[10:]))
+    
+    # Plot configuration
+    fig, ax = plt.subplots(figsize=(10, 8))
+    ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140, colors=plt.cm.Set3.colors)
+    
+    # Include the total codon count in the chart title
+    ax.set_title(f"Top 10 Codon Frequency Upstream of {stop_type}\n(Total Codons: {total_count})", fontsize=14)
+    ax.axis('equal')
+    
+    # Save the figure to a file as required by the portfolio
+    save_path = f"codon_freq_{stop_type}_top10.png"
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=150)
+    print(f"Pie chart saved successfully: {save_path}")
+    plt.close()
 
-# 3. Core program execution
+# 4. Main execution logic
 if __name__ == "__main__":
-    # Set input and output file paths
-    INPUT_FILE = r"Saccharomyces_cerevisiae.R64-1-1.cdna.all.fa"
-    OUTPUT_FILE = "stop_genes.fa"
+    # Ensure the script operates in its own directory
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    
+    # User interaction for stop codon selection
+    target = input("Please enter a stop codon for analysis (TAA/TAG/TGA): ").strip().upper()
+    
+    if target in VALID_STOPS:
+        INPUT_FILE = "Saccharomyces_cerevisiae.R64-1-1.cdna.all.fa"
+        
+        print(f"Reading {INPUT_FILE}...")
+        try:
+            genes = read_fasta(INPUT_FILE)
+            
+            # Aggregate codon counts across all valid genes
+            global_counts = {}
+            for sequence in genes.values():
+                upstream_codons = get_longest_orf_codons(sequence, target)
+                for codon in upstream_codons:
+                    global_counts[codon] = global_counts.get(codon, 0) + 1
+            
+            # Output report and generate plot
+            if global_counts:
+                print(f"\n--- Results for {target} ---")
+                print(f"Total upstream codons analyzed: {sum(global_counts.values())}")
+                plot_usage_pie(global_counts, target)
+            else:
+                print(f"No in-frame sequences were found ending with {target}.")
+                
+        except FileNotFoundError:
+            print(f"Error: The file '{INPUT_FILE}' was not found in this folder.")
+    else:
+        print("Invalid entry. Please use TAA, TAG, or TGA.")
 
-    # Step 1: Read FASTA file
-    print("Reading FASTA file...")
-    genes = read_fasta(INPUT_FILE)
-
-    # Step 2: Process genes and write results
-    print("Processing genes and writing results...")
-    write_filtered_fasta(OUTPUT_FILE, genes)
-
-    print("Done! Output file: stop_genes.fa")
+    print("\nProcess finished.")

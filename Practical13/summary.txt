@@ -1,0 +1,10 @@
+Human DLX5 Length: 289 aa
+Subcellular Localisation: Nucleus
+Online BLAST Range: 52.3% - 100%
+
+Python Alignment Results (BLOSUM62):
+Human vs Mouse: Score 1490, Identity 96.54%
+Human vs Random: Score -270, Identity 7.61%
+Mouse vs Random: Score -288, Identity 6.92%
+
+Conclusion: Human and Mouse DLX5 are most closely related.
